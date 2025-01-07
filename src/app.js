@@ -31,7 +31,7 @@ function convert(switched) {
     input = parseInt(get("input").value);
     inputUnit = get("input-selector").value;
     outputUnit = get("output-selector").value;
-    if (switched && isNaN(input) && inputUnit.charAt(0) == 'S' && outputUnit.charAt(0) == 'S') {
+    if (switched && (isNaN(input) || inputUnit.charAt(0) == 'S' || outputUnit.charAt(0) == 'S')) {
         return;
     }
     if (isNaN(input) || inputUnit.charAt(0) == 'S' || outputUnit.charAt(0) == 'S') {
@@ -73,18 +73,21 @@ function select(old, newSelector) {
     }
 }
 const convertButton = get("convert-button");
-const outputSelector = get("output-selector");
-const inputSelector = get("input-selector");
+let outputSelector = get("output-selector");
+let inputSelector = get("input-selector");
 const switchButton = get("switch-button");
+function addSelectListeners() {
+    outputSelector.addEventListener("change", () => {
+        get("output").innerHTML = "";
+    });
+    inputSelector.addEventListener("change", () => {
+        get("output").innerHTML = "";
+    });
+}
 convertButton.addEventListener("click", () => {
     convert(false);
 });
-outputSelector.addEventListener("change", () => {
-    get("output").innerHTML = "";
-});
-inputSelector.addEventListener("change", () => {
-    get("output").innerHTML = "";
-});
+addSelectListeners();
 switchButton.addEventListener("click", () => {
     // make sure to change ids
     const inputParent = get("input-container");
@@ -96,9 +99,18 @@ switchButton.addEventListener("click", () => {
     newInput.id = "input-selector";
     select(output, newInput);
     inputParent.appendChild(newInput);
+    inputSelector = get("input-selector");
     outputParent.removeChild(output);
     input.id = "output-selector";
     outputParent.appendChild(input);
+    outputSelector = get("output-selector");
+    outputSelector.addEventListener("change", () => {
+        get("output").innerHTML = "";
+    });
+    inputSelector.addEventListener("change", () => {
+        get("output").innerHTML = "";
+    });
+    addSelectListeners();
     impToMet = !impToMet;
     convert(true);
 });

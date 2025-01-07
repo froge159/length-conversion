@@ -1,48 +1,44 @@
-let input, output:number;
-let inputUnit, outputUnit:string;
+let input, output: number;
+let inputUnit, outputUnit: string;
 let impToMet = true;
-let historyLength = 0;
-let metricScale: { [key: string]: number } = {};
-	metricScale["Millimeter"] = 0.001;
-	metricScale["Centimeter"] = 0.01;
-	metricScale["Meter"] = 1;
-	metricScale["Kilometer"] = 1000;
-let imperialScale: { [key: string]: number } = {};
-	imperialScale["Inch"] = 1;
-	imperialScale["Foot"] = 12;
-	imperialScale["Yard"] = 36;
-	imperialScale["Mile"] = 63360;
+let historyLength = 0
+
+let metricScale: { [key: string]: number; } = {};
+metricScale["Millimeter"] = 0.001;
+metricScale["Centimeter"] = 0.01;
+metricScale["Meter"] = 1;
+metricScale["Kilometer"] = 1000;
+let imperialScale: { [key: string]: number; } = {};
+imperialScale["Inch"] = 1;
+imperialScale["Foot"] = 12;
+imperialScale["Yard"] = 36;
+imperialScale["Mile"] = 63360;
 
 
-
-
-
-
-
-function get(id:string) {
+function get(id: string) {
 	return document.getElementById(id);
 }
 
 function getCurrentTime() {
 	const now = new Date();
 	const hours = now.getHours();
-	const minutes = String(now.getMinutes()).padStart(2, '0'); 
+	const minutes = String(now.getMinutes()).padStart(2, '0');
 	const period = hours >= 12 ? 'PM' : 'AM';
-	
+
 	let formattedHours = hours > 12 ? hours - 12 : hours;
 	if (formattedHours === 0) {
-		formattedHours = 12; 
+		formattedHours = 12;
 	}
-	
+
 	return `${formattedHours}:${minutes}${period}`;
 }
 
-function convert(switched:boolean) {
+function convert(switched: boolean) {
 	input = parseInt((get("input") as HTMLInputElement).value);
 	inputUnit = (get("input-selector") as HTMLSelectElement).value;
 	outputUnit = (get("output-selector") as HTMLSelectElement).value;
 
-	if (switched && isNaN(input) && inputUnit.charAt(0) == 'S' && outputUnit.charAt(0) == 'S') {
+	if (switched && (isNaN(input) || inputUnit.charAt(0) == 'S' || outputUnit.charAt(0) == 'S')) {
 		return;
 	}
 
@@ -62,16 +58,16 @@ function convert(switched:boolean) {
 	get("output").innerHTML = output.toPrecision(4);
 
 	const now = new Date();
-	let line:string[] = [`${input} ${inputUnit.toLowerCase()} = ${output.toPrecision(4)} ${outputUnit.toLowerCase()}`, `${getCurrentTime().toLowerCase()}`]
-	
+	let line: string[] = [`${input} ${inputUnit.toLowerCase()} = ${output.toPrecision(4)} ${outputUnit.toLowerCase()}`, `${getCurrentTime().toLowerCase()}`];
+
 	const parent = get("history-output");
 	const newDiv = document.createElement('div');
-		newDiv.className = 'history-line';
+	newDiv.className = 'history-line';
 	const newP = document.createElement('p');
-		newP.textContent = line[0];
+	newP.textContent = line[0];
 	const newTime = document.createElement('p');
-		newTime.textContent = line[1];
-		newTime.className = 'time';
+	newTime.textContent = line[1];
+	newTime.className = 'time';
 	newDiv.appendChild(newP);
 	newDiv.appendChild(newTime);
 	parent.insertBefore(newDiv, parent.firstChild);
@@ -80,7 +76,7 @@ function convert(switched:boolean) {
 	if (historyLength > 0) get("history-output").classList.add("border", "border-secondary", "rounded");
 }
 
-function select(old:HTMLSelectElement, newSelector:HTMLSelectElement) {
+function select(old: HTMLSelectElement, newSelector: HTMLSelectElement) {
 	for (let i = 0; i < newSelector.options.length; i++) {
 		if (newSelector.options[i].value === old.value) {
 			newSelector.options[i].selected = true;
@@ -90,26 +86,26 @@ function select(old:HTMLSelectElement, newSelector:HTMLSelectElement) {
 }
 
 
-
-
-
-
 const convertButton = get("convert-button");
-const outputSelector = get("output-selector");
-const inputSelector = get("input-selector");
+let outputSelector = get("output-selector");
+let inputSelector = get("input-selector");
 const switchButton = get("switch-button");
+
+function addSelectListeners() {
+	outputSelector.addEventListener("change", () => {
+		get("output").innerHTML = "";
+	});
+
+	inputSelector.addEventListener("change", () => {
+		get("output").innerHTML = "";
+	});
+}
 
 convertButton.addEventListener("click", () => {
 	convert(false);
 });
 
-outputSelector.addEventListener("change", () => {
-	get("output").innerHTML = "";
-});
-
-inputSelector.addEventListener("change", () => {
-	get("output").innerHTML = "";
-});
+addSelectListeners();
 
 switchButton.addEventListener("click", () => {
 	// make sure to change ids
@@ -123,11 +119,22 @@ switchButton.addEventListener("click", () => {
 	newInput.id = "input-selector";
 	select(output, newInput);
 	inputParent.appendChild(newInput);
+	inputSelector = get("input-selector");
 
 	outputParent.removeChild(output);
 	input.id = "output-selector";
 	outputParent.appendChild(input);
+	outputSelector = get("output-selector");
 
+	outputSelector.addEventListener("change", () => {
+		get("output").innerHTML = "";
+	});
+
+	inputSelector.addEventListener("change", () => {
+		get("output").innerHTML = "";
+	});
+
+	addSelectListeners();
 	impToMet = !impToMet;
 	convert(true);
 });
