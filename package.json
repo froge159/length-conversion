@@ -1,5 +1,9 @@
 {
   "devDependencies": {
-    "typescript": "^5.7.2"
-  }
+    "typescript": "^5.7.2",
+    "@types/bun": "latest"
+  },
+  "name": "conversion",
+  "module": "index.ts",
+  "type": "module"
 }
